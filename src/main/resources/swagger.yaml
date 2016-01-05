@@ -1,0 +1,73 @@
+swagger: '2.0'
+info:
+  title: Furnace API
+  description: Heating Reactively
+  version: 0.0.1
+host: api.rxthings.com
+schemes:
+  - http
+basePath: /v1
+produces:
+  - application/json
+consumes:
+  - application/json
+paths:
+  /gets/upper:
+    get:
+      summary: Get upper bound of temperature threshold
+      tags:
+        - Getter
+      responses:
+        '200':
+          description: Integer upper bound in celcius
+          schema:
+            type: integer
+            format: int32
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /sets/upper:
+    put:
+      summary: Set upper bound of temperature threshold
+      tags:
+        - Setter
+      responses:
+        '405':
+          description: Invalid Temperature
+
+  /gets/lower:
+    get:
+      summary: Get lower bound of temperature threshold
+      tags:
+        - Getter
+      responses:
+        '200':
+          description: Integer lower bound in celcius
+          schema:
+            type: integer
+            format: int32
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /sets/lower:
+    put:
+      summary: Set lower bound of temperature threshold
+      tags:
+        - Setter
+      responses:
+        '405':
+          description: Invalid Temperature
+            
+definitions:
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
