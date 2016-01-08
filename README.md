@@ -5,7 +5,7 @@ Furnace
 
 ## Bugs and Feedback
 
-For bugs, questions and discussions please use the [Github Issues](https://github.com/jw3/RxGpio/issues).
+For bugs, questions and discussions please use the [Github Issues](https://github.com/jw3/furnace/issues).
 
 ## LICENSE
 
