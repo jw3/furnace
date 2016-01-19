@@ -1,18 +1,16 @@
-
+organization := "com.rxthings"
 name := "furnace"
-
-version := "0.1"
+version := "0.1-SNAPSHOT"
+licenses +=("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 
 scalaVersion := "2.11.7"
+scalacOptions += "-target:jvm-1.8"
 
+resolvers += "jw3 at bintray" at "https://dl.bintray.com/jw3/maven"
 libraryDependencies := {
     Seq(
-        "org.scala-lang" % "scala-library" % "2.11.7",
-        "org.scala-lang" % "scala-reflect" % "2.11.7",
-
-        "wiii" %% "awebapi" % "0.2",
-        "wiii" %% "akka-injects" % "0.1",
-
+        "wiii" %% "awebapi" % "0.3",
+        "com.rxthings" %% "akka-injects" % "0.2",
         "com.rxthings" %% "rxgpio-akka" % "0.0.1-0125d9769a19670ac3684e9c8f494daccb86e8d8-SNAPSHOT",
 
         "gpio4s" %% "gpiocfg" % "0.1",
