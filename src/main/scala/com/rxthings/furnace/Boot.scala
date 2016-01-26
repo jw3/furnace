@@ -1,8 +1,9 @@
 package com.rxthings.furnace
 
-import akka.actor.{ActorSystem, Props}
-import com.rxthings.furnace.Events.Register
+import akka.actor.{ActorRef, ActorSystem}
+import com.rxthings.furnace.Events.{Register, Subscribe}
 import com.rxthings.furnace.thermostats.DS18b20
+import com.rxthings.inject._
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import net.ceedubs.ficus.Ficus._
@@ -17,16 +18,20 @@ object Boot extends App with LazyLogging {
     implicit val pigpio = BootUtils.rxgpio()
     implicit val sys = ActorSystem("FurnaceApp")
 
-    val furnace = sys.actorOf(Props[Furnace])
+    val furnace = Furnace()
+    val log: Option[ActorRef] = InjectActor[FurnaceLog]
 
     val config = sys.settings.config.getAs[Config]("furnace")
     val devices = config.flatMap(_.getAs[Seq[String]]("devices"))
 
     devices match {
         case Some(list) =>
+            logger.debug(s"installing devices from config, $list")
             list.foreach(id => furnace ! Register(id, DS18b20(id)))
+            log.foreach(l => list.foreach(id => l.tell(Subscribe(id), furnace)))
+
         case None =>
-            logger.error("no devices specified")
+            logger.error("no devices specified in config")
             sys.terminate()
     }
 

@@ -1,12 +1,15 @@
 package com.rxthings.furnace
 
-
-import akka.actor.Actor
 import akka.http.scaladsl.server.Directives._
 import wiii.awa.ActorWebApi
 
-trait EndPoints extends Actor with ActorWebApi {
+trait EndPoints {
+    this: ActorWebApi =>
+
     val apiver = "v1"
+
+    def setTempUpperBounds(v: Int)
+    def setTempLowerBounds(v: Int)
 
     val setters =
         pathPrefix(apiver) {
@@ -19,6 +22,10 @@ trait EndPoints extends Actor with ActorWebApi {
                 }
             }
         }
+
+    def getTempUpperBounds(): Int
+    def getTempLowerBounds(): Int
+
     val getters =
         pathPrefix(apiver) {
             (get & path("gets")) {
@@ -30,6 +37,7 @@ trait EndPoints extends Actor with ActorWebApi {
                 }
             }
         }
+
     val controls =
         pathPrefix(apiver) {
             (put & path("control")) {
@@ -50,6 +58,12 @@ trait EndPoints extends Actor with ActorWebApi {
                 }
             }
         }
+
+    def statHighTemp(): Int
+    def statLogTemp(): Int
+    def statDailyAvg(): Int
+    def statUptime(): Int
+
     val stats =
         pathPrefix(apiver) {
             (get & path("stats")) {

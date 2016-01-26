@@ -4,16 +4,23 @@ package com.rxthings.furnace
 import akka.actor._
 import com.rxthings.furnace.Events._
 import com.typesafe.scalalogging.LazyLogging
+import wiii.awa.ActorWebApi
 
+import scala.annotation.meta
 import scala.collection.mutable
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
-class Furnace extends Actor with LazyLogging {
+
+object Furnace {
+    def props() = Props[Furnace]
+    def apply()(implicit sys: ActorSystem) = sys.actorOf(props())
+}
+
+class Furnace extends Actor with ActorWebApi with LazyLogging {
     val devices = mutable.Map[String, ActorRef]()
     val subscribers = new mutable.HashMap[String, mutable.Set[ActorRef]] with mutable.MultiMap[String, ActorRef]
 
     val cancellers = mutable.Map[String, Cancellable]()
-    var scheduling = false
 
     def receive: Receive = {
         case m @ Register(id, device) =>
@@ -31,10 +38,11 @@ class Furnace extends Actor with LazyLogging {
         case r: Reading =>
             subscribers.get(r.dev).foreach(_.foreach(_ ! r))
 
-        case ReadingFailure(id, t, meta) =>
+        case f @ ReadingFailure(id, t, meta) =>
             logger.warn(s"failed to read DS18b20: id:[$id] meta:[${meta.getOrElse("")}]")
+            subscribers.get(f.dev).foreach(_.foreach(_ ! f))
 
-        case m @ ScheduleUpdates(id, interval) if scheduling =>
+        case m @ ScheduleUpdates(id, interval) =>
             cancellers(id) = scheduleUpdate(id, interval)
 
         case m @ _ =>
@@ -44,10 +52,7 @@ class Furnace extends Actor with LazyLogging {
     def scheduleUpdate(id: String, interval: FiniteDuration) =
         context.system.scheduler.schedule(5 seconds, interval, self, Refresh(id))(context.system.dispatcher)
 
-    override def preStart(): Unit = logger.trace(s"starting TempReader")
-}
-
-object Furnace {
-    def props() = Props[Furnace]
-    def apply()(implicit sys: ActorSystem) = sys.actorOf(props())
+    override def preStart(): Unit = {
+        logger.trace(s"starting Furnace")
+    }
 }
